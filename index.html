@@ -3356,37 +3356,29 @@
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content dp-modal-content">
         <div class="modal-header dp-modal-header">
-          <h5 class="modal-title" id="transferBankModalLabel"><i class="bi bi-bank me-2"></i>Transfer to Bank Account</h5>
           <button type="button" class="dp-page-back" data-bs-dismiss="modal" aria-label="Back"><i class="bi bi-chevron-left"></i></button>
+          <h5 class="modal-title" id="transferBankModalLabel"><i class="bi bi-bank me-2"></i>Transfer to Bank Account</h5>
+          <button type="button" class="btn dp-link-btn btn-sm" data-label="Bank Transfer History">History</button>
         </div>
         <div class="modal-body">
           <form id="transferBankForm" novalidate>
             <div class="mb-3">
               <label for="transferBankAccount" class="form-label dp-mini-label">Recipient account</label>
-              <input type="text" inputmode="numeric" class="form-control dp-input" id="transferBankAccount" placeholder="Enter 10-digit account number" maxlength="10" />
+              <input type="text" inputmode="numeric" class="form-control dp-input" id="transferBankAccount" placeholder="Enter 10-digit account number" maxlength="10" required pattern="[0-9]{10}" />
             </div>
-            <div class="mb-3">
-              <label for="transferBankSelect" class="form-label dp-mini-label">Select bank</label>
-              <select class="form-select dp-input" id="transferBankSelect">
-                <option value="" selected disabled>Choose a bank</option>
-                <option>Meridian Bank</option>
-                <option>Horizon Trust</option>
-                <option>Unity Capital Bank</option>
-                <option>Zenith Point Bank</option>
-                <option>Northgate MFB</option>
-                <option>Coastline Bank</option>
-                <option>Summit MFB</option>
-                <option>Pinnacle Trust</option>
-                <option>Riverside Bank</option>
-                <option>Sterling Gate Bank</option>
-                <option>Beacon Trust Bank</option>
-                <option>Ivory Merchant Bank</option>
-                <option>Harborview MFB</option>
-                <option>Crestline Bank</option>
-                <option>Lakeside Capital Bank</option>
-                <option>Vantage Point Bank</option>
-              </select>
-            </div>
+            <button
+              type="button"
+              class="dp-field-picker-row mb-3"
+              id="transferBankSelectRow"
+              data-bs-toggle="modal"
+              data-bs-target="#bankSelectModal"
+            >
+              <span class="dp-field-picker-placeholder" id="transferBankSelectedText">Select Bank</span>
+              <i class="bi bi-chevron-right"></i>
+            </button>
+            <!-- Native control kept for real form validation (checkValidity()) —
+                 visually hidden, its value is set by the bank picker in ui.js. -->
+            <input type="text" id="transferBankSelectedValue" class="visually-hidden" required aria-hidden="true" tabindex="-1" />
             <button type="submit" class="btn dp-btn-primary w-100 dp-slide-cta mb-3" id="transferBankNextBtn">
               Next <i class="bi bi-arrow-right dp-cta-arrow"></i>
             </button>
@@ -3407,28 +3399,26 @@
             <i class="bi bi-chevron-right dp-help-item-chevron"></i>
           </button>
 
-          <p class="dp-mini-label mb-2">Recents</p>
-          <div class="dp-recent-row">
-            <span class="dp-recent-logo"><i class="bi bi-person-fill"></i></span>
-            <div class="flex-grow-1">
-              <p class="dp-bonus-title mb-0">Amara O.</p>
-              <p class="dp-bonus-sub mb-0">••••••4821 · Meridian Bank</p>
-            </div>
+          <div class="dp-tx-tabs">
+            <button type="button" class="dp-tx-tab active" data-recip-tab="recents">Recents</button>
+            <button type="button" class="dp-tx-tab" data-recip-tab="favourites">Favourites</button>
+            <button type="button" class="dp-tx-tab-search-btn" aria-label="Search recipients" id="bankRecipientSearchBtn">
+              <i class="bi bi-search"></i>
+            </button>
           </div>
-          <div class="dp-recent-row">
-            <span class="dp-recent-logo"><i class="bi bi-person-fill"></i></span>
-            <div class="flex-grow-1">
-              <p class="dp-bonus-title mb-0">Tunde A.</p>
-              <p class="dp-bonus-sub mb-0">••••••7730 · Horizon Trust</p>
-            </div>
-          </div>
-          <div class="dp-recent-row">
-            <span class="dp-recent-logo"><i class="bi bi-person-fill"></i></span>
-            <div class="flex-grow-1">
-              <p class="dp-bonus-title mb-0">Ijeoma K.</p>
-              <p class="dp-bonus-sub mb-0">••••••3392 · Unity Capital Bank</p>
-            </div>
-          </div>
+          <input type="text" class="form-control dp-input dp-tx-search-input d-none" placeholder="Search recipients" id="bankRecipientSearchInput" />
+          <div id="bankRecipientsList"></div>
+          <button type="button" class="dp-view-all-pill" data-label="All Bank Recipients">View All <i class="bi bi-chevron-right"></i></button>
+
+          <p class="dp-mini-label mb-2 mt-4">More Events</p>
+          <button type="button" class="dp-help-item" data-label="Super Voucher Package">
+            <span class="dp-help-item-icon"><i class="bi bi-ticket-perforated-fill"></i></span>
+            <span>
+              <span class="dp-help-item-title d-block">Super Voucher Package</span>
+              <span class="dp-help-item-sub">Claim 8 discounts with $0.19 on any bill</span>
+            </span>
+            <i class="bi bi-chevron-right dp-help-item-chevron"></i>
+          </button>
         </div>
       </div>
     </div>
@@ -3441,47 +3431,93 @@
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content dp-modal-content">
         <div class="modal-header dp-modal-header">
-          <h5 class="modal-title" id="transferWalletModalLabel"><i class="bi bi-send-fill me-2"></i>Transfer to DubemPay Account</h5>
           <button type="button" class="dp-page-back" data-bs-dismiss="modal" aria-label="Back"><i class="bi bi-chevron-left"></i></button>
+          <h5 class="modal-title" id="transferWalletModalLabel"><i class="bi bi-send-fill me-2"></i>Transfer to DubemPay Account</h5>
+          <button type="button" class="btn dp-link-btn btn-sm" data-label="Wallet Transfer History">History</button>
         </div>
         <div class="modal-body">
-          <div class="dp-glass-inset mb-3">
-            <p class="dp-bonus-title mb-0"><i class="bi bi-lightning-charge-fill me-1"></i>Instant, zero fees, free</p>
+          <div class="dp-instant-banner">
+            <i class="bi bi-lightning-charge-fill"></i> Instant, Zero Issues, Free
           </div>
+
           <form id="transferWalletForm" novalidate>
-            <div class="mb-3">
-              <label for="transferWalletRecipient" class="form-label dp-mini-label">Recipient account</label>
-              <input type="text" class="form-control dp-input" id="transferWalletRecipient" placeholder="Phone No. / Account No. / Name" />
+            <label for="transferWalletRecipient" class="form-label dp-mini-label fw-bold">Recipient Account</label>
+            <div class="dp-recipient-input-wrap mb-1">
+              <input type="text" class="form-control dp-input" id="transferWalletRecipient" placeholder="Phone No. / Account No. / Name" required />
+              <button type="button" class="dp-recipient-scan-btn" data-label="Scan Recipient QR Code" aria-label="Scan QR code">
+                <i class="bi bi-qr-code-scan"></i>
+              </button>
             </div>
+            <p class="dp-recipient-helper mb-3">
+              Don't know the recipient's DubemPay account number?
+              <button type="button" class="dp-link-btn" data-label="Ask Recipient for Account Number">Ask them ></button>
+            </p>
             <button type="submit" class="btn dp-btn-primary w-100 dp-slide-cta mb-3" id="transferWalletNextBtn">
               Next <i class="bi bi-arrow-right dp-cta-arrow"></i>
             </button>
           </form>
 
-          <p class="dp-mini-label mb-2">Recents</p>
-          <div class="dp-recent-row">
-            <span class="dp-recent-logo"><i class="bi bi-person-fill"></i></span>
-            <div class="flex-grow-1">
-              <p class="dp-bonus-title mb-0">Chuka N.</p>
-              <p class="dp-bonus-sub mb-0">070 512 8834</p>
-            </div>
+          <div class="dp-tx-tabs">
+            <button type="button" class="dp-tx-tab active" data-recip-tab="recents">Recents</button>
+            <button type="button" class="dp-tx-tab" data-recip-tab="favourites">Favourites</button>
+            <button type="button" class="dp-tx-tab-search-btn" aria-label="Search recipients" id="walletRecipientSearchBtn">
+              <i class="bi bi-search"></i>
+            </button>
           </div>
-          <div class="dp-recent-row">
-            <span class="dp-recent-logo"><i class="bi bi-person-fill"></i></span>
-            <div class="flex-grow-1">
-              <p class="dp-bonus-title mb-0">Grace E.</p>
-              <p class="dp-bonus-sub mb-0">081 220 4471</p>
-            </div>
+          <input type="text" class="form-control dp-input dp-tx-search-input d-none" placeholder="Search recipients" id="walletRecipientSearchInput" />
+          <div id="walletRecipientsList"></div>
+          <button type="button" class="dp-view-all-pill mb-3" data-label="All DubemPay Recipients">View All <i class="bi bi-chevron-right"></i></button>
+
+          <button type="button" class="dp-help-item mb-3" data-label="Contacts on DubemPay">
+            <span class="dp-help-item-icon"><i class="bi bi-people-fill"></i></span>
+            <span>
+              <span class="dp-help-item-title d-block">See who else is using DubemPay</span>
+              <span class="dp-help-item-sub">236 of your contacts use DubemPay</span>
+            </span>
+            <i class="bi bi-chevron-right dp-help-item-chevron"></i>
+          </button>
+
+          <p class="dp-mini-label mb-2">More Events</p>
+          <button type="button" class="dp-help-item" data-label="Super Voucher Package">
+            <span class="dp-help-item-icon"><i class="bi bi-ticket-perforated-fill"></i></span>
+            <span>
+              <span class="dp-help-item-title d-block">Super Voucher Package</span>
+              <span class="dp-help-item-sub">Claim 8 discounts with $0.19 on any bill</span>
+            </span>
+            <i class="bi bi-chevron-right dp-help-item-chevron"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===========================================================
+       MODAL: SELECT BANK
+       Search + an A–Z jump index, opened from the "Select Bank" row
+       inside #transferBankModal (a plain native <select> used to sit
+       there — not a real page, and it looked/behaved nothing like the
+       rest of the app). Rows are rendered by initBankSelectModal() in
+       ui.js from the BANKS table.
+  ============================================================ -->
+  <div class="modal fade" id="bankSelectModal" tabindex="-1" aria-labelledby="bankSelectModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content dp-modal-content">
+        <div class="modal-header dp-modal-header">
+          <button type="button" class="dp-page-back" data-bs-dismiss="modal" aria-label="Back"><i class="bi bi-chevron-left"></i></button>
+          <h5 class="modal-title" id="bankSelectModalLabel">Select Bank</h5>
+        </div>
+        <div class="modal-body">
+          <div class="dp-bank-search-wrap">
+            <i class="bi bi-search"></i>
+            <input type="text" class="form-control dp-input" id="bankSearchInput" placeholder="Search Bank Name" />
           </div>
-          <div class="dp-recent-row">
-            <span class="dp-recent-logo"><i class="bi bi-person-fill"></i></span>
-            <div class="flex-grow-1">
-              <p class="dp-bonus-title mb-0">Bola S.</p>
-              <p class="dp-bonus-sub mb-0">090 337 6612</p>
-            </div>
+          <div class="dp-bankpicker-list" id="bankGroupsList">
+            <!-- grouped rows rendered by initBankSelectModal() -->
           </div>
         </div>
       </div>
+      <!-- Positioned fixed (not inside the scroll column), see initBankSelectModal() -->
+      <div class="dp-az-index" id="bankAzIndex"></div>
     </div>
   </div>
 

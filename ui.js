@@ -1220,11 +1220,19 @@ function initServiceModals() {
     title: "Transfer Submitted",
     message: "Funds are on their way — this can take a few minutes.",
     details: [
-      { label: "Bank", value: document.getElementById("transferBankSelect").value || "—" },
+      { label: "Bank", value: document.getElementById("transferBankSelectedValue").value || "—" },
       { label: "Account Number", value: document.getElementById("transferBankAccount").value || "—" },
       { label: "Reference", value: generateRef() },
     ],
   }));
+  // form.reset() (inside wireDemoForm, after a successful submit) clears
+  // the hidden #transferBankSelectedValue input along with everything
+  // else in the form, but it can't know to also reset the *visible*
+  // picker row text/state next to it — that isn't a native form control.
+  document.getElementById("transferBankForm")?.addEventListener("reset", () => {
+    document.getElementById("transferBankSelectedText").textContent = "Select Bank";
+    document.getElementById("transferBankSelectRow").classList.remove("has-value", "is-invalid");
+  });
   wireDemoForm("transferWalletForm", "transferWalletNextBtn", "✅ Transfer submitted — funds are on their way.", 0.9, () => ({
     title: "Transfer Submitted",
     message: "Funds are on their way — this can take a few minutes.",
@@ -1699,6 +1707,249 @@ function initUssdModal() {
       playChime(toggle.checked ? 920 : 700);
     });
   }
+}
+
+
+/* -----------------------------------------------------------------
+   9b. TRANSFER — Select Bank picker (search + A–Z jump index) and the
+   Recents/Favourites recipient lists shared by "Transfer to Bank
+   Account" and "Transfer to DubemPay Account".
+----------------------------------------------------------------- */
+// 🔧 EDIT HERE: fictional bank directory for the demo. Real ones list
+// hundreds of banks/MFBs — this is a representative spread across the
+// alphabet, not an exhaustive list. initials/color are just for the
+// round avatar badge, same reasoning as DISCO_PROVIDERS above.
+const BANKS = [
+  { name: "Apex Trust Bank", color: "#2563eb" }, { name: "Anchor MFB", color: "#0891b2" },
+  { name: "Beacon Trust Bank", color: "#dc2626" }, { name: "Bridgeway Bank", color: "#7c3aed" },
+  { name: "Coastline Bank", color: "#059669" }, { name: "Crestline Bank", color: "#0d9488" },
+  { name: "Capital Union MFB", color: "#4338ca" },
+  { name: "Delta Merchant Bank", color: "#ea580c" },
+  { name: "Everstone Bank", color: "#65a30d" },
+  { name: "Fortress Trust", color: "#be123c" },
+  { name: "Gateway MFB", color: "#0369a1" },
+  { name: "Horizon Trust", color: "#9333ea" }, { name: "Harborview MFB", color: "#0891b2" },
+  { name: "Ivory Merchant Bank", color: "#b45309" },
+  { name: "Jubilee Trust Bank", color: "#15803d" },
+  { name: "Keystone Bank Plus", color: "#1d4ed8" },
+  { name: "Lakeside Capital Bank", color: "#0f766e" }, { name: "Liberty MFB", color: "#c2410c" },
+  { name: "Meridian Bank", color: "#2f6fed" },
+  { name: "Northgate MFB", color: "#0891b2" }, { name: "Novus Trust", color: "#7c3aed" },
+  { name: "Oakridge Bank", color: "#16a34a" },
+  { name: "Pinnacle Trust", color: "#dc2626" }, { name: "Prosperity MFB", color: "#0d9488" },
+  { name: "Quantum Trust Bank", color: "#4f46e5" },
+  { name: "Riverside Bank", color: "#0e7490" },
+  { name: "Summit MFB", color: "#b91c1c" }, { name: "Sterling Gate Bank", color: "#059669" }, { name: "Skyline Capital", color: "#6d28d9" },
+  { name: "Trustline MFB", color: "#ca8a04" },
+  { name: "Unity Capital Bank", color: "#1e40af" }, { name: "Union Gateway Bank", color: "#0f766e" },
+  { name: "Vantage Point Bank", color: "#be185d" }, { name: "Valley Trust MFB", color: "#15803d" },
+  { name: "Westbrook Bank", color: "#374151" },
+  { name: "Yorkshire MFB", color: "#9a3412" },
+  { name: "Zenith Point Bank", color: "#5b21b6" },
+];
+
+function initBankSelectModal() {
+  const groupsList = document.getElementById("bankGroupsList");
+  const azIndex = document.getElementById("bankAzIndex");
+  const searchInput = document.getElementById("bankSearchInput");
+  const pickerRow = document.getElementById("transferBankSelectRow");
+  const pickerText = document.getElementById("transferBankSelectedText");
+  const hiddenValue = document.getElementById("transferBankSelectedValue");
+  if (!groupsList) return;
+
+  function initials(name) {
+    return name.split(" ").filter((w) => /^[A-Za-z]/.test(w)).slice(0, 2).map((w) => w[0]).join("").toUpperCase();
+  }
+
+  function render(query = "") {
+    const q = query.trim().toLowerCase();
+    const filtered = BANKS.filter((b) => b.name.toLowerCase().includes(q)).sort((a, b) => a.name.localeCompare(b.name));
+
+    if (filtered.length === 0) {
+      groupsList.innerHTML = `<p class="dp-mini-copy text-center py-4 mb-0">No banks match "${escapeHTML(query)}".</p>`;
+      azIndex.innerHTML = "";
+      return;
+    }
+
+    const letters = [];
+    let html = "";
+    filtered.forEach((bank) => {
+      const letter = bank.name[0].toUpperCase();
+      if (!letters.includes(letter)) {
+        letters.push(letter);
+        html += `<p class="dp-bankpicker-group-header" id="bankGroup-${letter}">${letter}</p>`;
+      }
+      html += `
+        <button type="button" class="dp-bankpicker-row" data-bank="${escapeHTML(bank.name)}">
+          <span class="dp-bankpicker-logo" style="background:${bank.color};">${initials(bank.name)}</span>
+          <span>${escapeHTML(bank.name)}</span>
+        </button>
+      `;
+    });
+    groupsList.innerHTML = html;
+
+    // Only render the jump index when NOT searching — matches most bank
+    // pickers (the index is for browsing, search already narrows things).
+    azIndex.innerHTML = query
+      ? ""
+      : letters.map((l) => `<button type="button" data-jump="${l}">${l}</button>`).join("");
+
+    groupsList.querySelectorAll(".dp-bankpicker-row").forEach((row) => {
+      row.addEventListener("click", () => {
+        const bankName = row.dataset.bank;
+        pickerText.textContent = bankName;
+        pickerRow.classList.add("has-value");
+        pickerRow.classList.remove("is-invalid");
+        hiddenValue.value = bankName;
+        bootstrap.Modal.getOrCreateInstance(document.getElementById("bankSelectModal")).hide();
+      });
+    });
+
+    azIndex.querySelectorAll("[data-jump]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        document.getElementById(`bankGroup-${btn.dataset.jump}`)?.scrollIntoView({ block: "start" });
+      });
+    });
+  }
+  render();
+
+  searchInput?.addEventListener("input", () => render(searchInput.value));
+
+  // Reset the search box each time the picker re-opens, so it doesn't
+  // silently reopen pre-filtered from whatever was typed last time.
+  document.getElementById("bankSelectModal")?.addEventListener("show.bs.modal", () => {
+    if (searchInput) searchInput.value = "";
+    render();
+  });
+
+  // The hidden required input can't show its own native validation UI
+  // (it's not rendered), so this puts that same "you missed a field"
+  // signal on the visible picker row instead.
+  hiddenValue?.addEventListener("invalid", () => {
+    pickerRow.classList.add("is-invalid");
+  });
+}
+
+/* -----------------------------------------------------------------
+   9c. TRANSFER — Recents / Favourites recipient lists
+----------------------------------------------------------------- */
+const BANK_RECIPIENTS = {
+  recents: [
+    { name: "Amara Okafor", detail: "••••••4821 · Meridian Bank", account: "0014294821", bank: "Meridian Bank", initials: "AO", color: "#2f6fed" },
+    { name: "Tunde Adeyemi", detail: "••••••7730 · Horizon Trust", account: "0028837730", bank: "Horizon Trust", initials: "TA", color: "#9333ea" },
+    { name: "Ijeoma Kalu", detail: "••••••3392 · Unity Capital Bank", account: "0071163392", bank: "Unity Capital Bank", initials: "IK", color: "#1e40af" },
+  ],
+  favourites: [
+    { name: "Chinedu Obi", detail: "••••••1090 · Zenith Point Bank", account: "0093451090", bank: "Zenith Point Bank", initials: "CO", color: "#5b21b6" },
+    { name: "Blessing Nwachukwu", detail: "••••••5567 · Coastline Bank", account: "0056785567", bank: "Coastline Bank", initials: "BN", color: "#059669" },
+    { name: "Emeka Okoro", detail: "••••••2214 · Meridian Bank", account: "0038802214", bank: "Meridian Bank", initials: "EO", color: "#2f6fed" },
+  ],
+};
+
+const WALLET_RECIPIENTS = {
+  recents: [
+    { name: "Chuka N.", detail: "070 512 8834", account: "0705128834", initials: "CN", color: "#0d9488" },
+    { name: "Grace E.", detail: "081 220 4471", account: "0812204471", initials: "GE", color: "#dc2626" },
+    { name: "Bola S.", detail: "090 337 6612", account: "0903376612", initials: "BS", color: "#0891b2" },
+  ],
+  favourites: [
+    { name: "Kelechi Obasi", detail: "080 441 2290", account: "0804412290", initials: "KO", color: "#7c3aed" },
+    { name: "Amaka Uche", detail: "091 663 5590", account: "0916635590", initials: "AU", color: "#ca8a04" },
+  ],
+};
+
+/**
+ * initRecipientPicker
+ * Shared by both transfer modals — wires the Recents/Favourites tabs,
+ * the search-icon-toggle, and renders recipient rows. Clicking a row
+ * fills in the form above it (and, for the bank modal, also selects
+ * that recipient's bank) rather than being purely decorative.
+ */
+function initRecipientPicker({ listId, tabsSelector, searchBtnId, searchInputId, data, onSelect }) {
+  const list = document.getElementById(listId);
+  const searchBtn = document.getElementById(searchBtnId);
+  const searchInput = document.getElementById(searchInputId);
+  if (!list) return;
+
+  let activeTab = "recents";
+
+  function render(query = "") {
+    const q = query.trim().toLowerCase();
+    const rows = data[activeTab].filter((r) => !q || r.name.toLowerCase().includes(q));
+    if (rows.length === 0) {
+      list.innerHTML = `<p class="dp-mini-copy text-center py-3 mb-0">No matches.</p>`;
+      return;
+    }
+    list.innerHTML = rows
+      .map(
+        (r) => `
+        <div class="dp-recent-row" data-recipient="${escapeHTML(r.name)}" style="cursor:pointer;">
+          <span class="dp-recent-logo" style="background:${r.color}; color:#fff;">${r.initials}</span>
+          <div class="flex-grow-1">
+            <p class="dp-bonus-title mb-0">${escapeHTML(r.name)}</p>
+            <p class="dp-bonus-sub mb-0">${escapeHTML(r.detail)}</p>
+          </div>
+        </div>
+      `
+      )
+      .join("");
+
+    list.querySelectorAll("[data-recipient]").forEach((row, i) => {
+      row.addEventListener("click", () => onSelect(rows[i]));
+    });
+  }
+  render();
+
+  document.querySelectorAll(tabsSelector).forEach((tab) => {
+    tab.addEventListener("click", () => {
+      document.querySelectorAll(tabsSelector).forEach((t) => t.classList.remove("active"));
+      tab.classList.add("active");
+      activeTab = tab.dataset.recipTab;
+      render(searchInput?.value || "");
+    });
+  });
+
+  searchBtn?.addEventListener("click", () => {
+    searchInput.classList.toggle("d-none");
+    if (!searchInput.classList.contains("d-none")) searchInput.focus();
+    else {
+      searchInput.value = "";
+      render();
+    }
+  });
+  searchInput?.addEventListener("input", () => render(searchInput.value));
+}
+
+function initTransferRecipientPickers() {
+  initRecipientPicker({
+    listId: "bankRecipientsList",
+    tabsSelector: "#transferBankModal .dp-tx-tab",
+    searchBtnId: "bankRecipientSearchBtn",
+    searchInputId: "bankRecipientSearchInput",
+    data: BANK_RECIPIENTS,
+    onSelect: (r) => {
+      document.getElementById("transferBankAccount").value = r.account;
+      const pickerText = document.getElementById("transferBankSelectedText");
+      const pickerRow = document.getElementById("transferBankSelectRow");
+      pickerText.textContent = r.bank;
+      pickerRow.classList.add("has-value");
+      pickerRow.classList.remove("is-invalid");
+      document.getElementById("transferBankSelectedValue").value = r.bank;
+      playChime(760);
+    },
+  });
+
+  initRecipientPicker({
+    listId: "walletRecipientsList",
+    tabsSelector: "#transferWalletModal .dp-tx-tab",
+    searchBtnId: "walletRecipientSearchBtn",
+    searchInputId: "walletRecipientSearchInput",
+    data: WALLET_RECIPIENTS,
+    onSelect: (r) => {
+      document.getElementById("transferWalletRecipient").value = r.account;
+      playChime(760);
+    },
+  });
 }
 
 

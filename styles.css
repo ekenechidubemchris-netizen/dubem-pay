@@ -136,7 +136,12 @@ body {
   color: var(--dp-text-primary);
   font-family: var(--dp-font-body);
   transition: background-color 0.35s ease, color 0.35s ease;
-  min-height: 100vh;
+  min-height: 100vh;   /* fallback for browsers without dvh support */
+  min-height: 100dvh;  /* dynamic viewport height — avoids a gap under
+                           fixed/bottom-pinned elements (the bottom nav)
+                           when a mobile browser's address bar auto-hides,
+                           since dvh tracks the ACTUAL visible viewport
+                           instead of the larger one vh assumes */
   /* Subtle ambient radial glow behind everything — pure CSS, no images */
   background-image:
     radial-gradient(circle at 15% 0%, rgba(0, 180, 216, 0.12), transparent 40%),
@@ -199,6 +204,7 @@ select:focus-visible {
   display: flex;
   align-items: stretch;
   min-height: 100vh;
+  min-height: 100dvh;
 }
 
 .dp-sidebar {
@@ -1661,6 +1667,7 @@ select:focus-visible {
 ----------------------------------------------------------------- */
 .dp-auth-screen {
   min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   background: var(--dp-bg);
 }
@@ -3472,7 +3479,6 @@ select:focus-visible {
   max-width: none;
   width: 100%;
   height: 100dvh;
-  min-height: 100vh;
   margin: 0;
   display: flex;
   align-items: stretch;
@@ -3799,4 +3805,207 @@ html[data-theme="light"] .dp-tx-icon-interest {
 }
 .dp-ussd-disabled {
   opacity: 0.5;
+}
+
+/* -----------------------------------------------------------------
+   17. TRANSFER PAGES — Select-Bank field row, the Recents/Favourites
+   tab strip with an inline search toggle, and the "View All" pill,
+   shared by "Transfer to Bank Account" and "Transfer to DubemPay
+   Account". The full bank picker (search + A–Z index) has its own
+   sub-section below.
+----------------------------------------------------------------- */
+.dp-field-picker-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--dp-border);
+  padding: 0.6rem 0.1rem;
+  color: var(--dp-text-primary);
+  font-size: 0.95rem;
+  text-align: left;
+}
+.dp-field-picker-row.is-invalid {
+  border-bottom-color: var(--dp-danger);
+}
+.dp-field-picker-placeholder {
+  color: var(--dp-text-muted);
+}
+.dp-field-picker-row.has-value .dp-field-picker-placeholder {
+  color: var(--dp-text-primary);
+  font-weight: 600;
+}
+.dp-field-picker-row i {
+  color: var(--dp-text-muted);
+  flex-shrink: 0;
+}
+
+.dp-instant-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(52, 211, 153, 0.14);
+  color: var(--dp-success);
+  font-weight: 700;
+  font-size: 0.85rem;
+  border-radius: var(--dp-radius-md);
+  padding: 0.7rem 1rem;
+  margin-bottom: 1rem;
+}
+
+.dp-recipient-input-wrap {
+  position: relative;
+}
+.dp-recipient-input-wrap .form-control {
+  padding-right: 2.6rem;
+}
+.dp-recipient-scan-btn {
+  position: absolute;
+  right: 0.6rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--dp-text-muted);
+  font-size: 1.1rem;
+  padding: 0.2rem;
+}
+.dp-recipient-helper {
+  font-size: 0.78rem;
+  color: var(--dp-text-muted);
+  margin: 0.5rem 0 1.1rem;
+}
+.dp-recipient-helper .dp-link-btn {
+  font-size: 0.78rem;
+  padding: 0;
+}
+
+.dp-tx-tabs {
+  display: flex;
+  align-items: center;
+  gap: 1.1rem;
+  border-bottom: 1px solid var(--dp-border);
+  margin-bottom: 0.5rem;
+}
+.dp-tx-tab {
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--dp-text-muted);
+  font-weight: 700;
+  font-size: 0.88rem;
+  padding: 0.5rem 0.1rem;
+}
+.dp-tx-tab.active {
+  color: var(--dp-accent-2);
+  border-bottom-color: var(--dp-accent-2);
+}
+.dp-tx-tab-search-btn {
+  margin-left: auto;
+  background: none;
+  border: none;
+  color: var(--dp-accent-2);
+  font-size: 1rem;
+  padding: 0.4rem;
+}
+.dp-tx-search-input {
+  margin-bottom: 0.5rem;
+}
+
+.dp-view-all-pill {
+  display: block;
+  margin: 0.5rem auto 0;
+  background: rgba(255, 255, 255, 0.06);
+  border: none;
+  border-radius: 999px;
+  color: var(--dp-text-primary);
+  font-weight: 600;
+  font-size: 0.8rem;
+  padding: 0.4rem 1.1rem;
+}
+
+/* -----------------------------------------------------------------
+   18. SELECT BANK — search box, sticky per-letter group headers, and
+   a fixed A–Z jump index along the right edge (mirrors most Nigerian
+   fintech apps' bank pickers).
+----------------------------------------------------------------- */
+.dp-bank-search-wrap {
+  position: relative;
+  margin-bottom: 1rem;
+}
+.dp-bank-search-wrap i {
+  position: absolute;
+  left: 0.9rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--dp-text-muted);
+}
+.dp-bank-search-wrap input {
+  padding-left: 2.3rem;
+  border-radius: 999px;
+}
+
+.dp-bankpicker-list {
+  position: relative;
+  padding-right: 1.6rem;
+}
+.dp-bankpicker-group-header {
+  position: sticky;
+  top: -1px;
+  background: var(--dp-bg-elevated);
+  color: var(--dp-text-muted);
+  font-weight: 800;
+  font-size: 0.78rem;
+  padding: 0.4rem 0.1rem;
+  z-index: 2;
+}
+.dp-bankpicker-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  background: none;
+  border: none;
+  border-top: 1px solid var(--dp-border);
+  padding: 0.65rem 0.1rem;
+  color: var(--dp-text-primary);
+  text-align: left;
+  font-size: 0.9rem;
+}
+.dp-bankpicker-row:hover {
+  background: rgba(var(--dp-accent-rgb), 0.06);
+}
+.dp-bankpicker-logo {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #fff;
+}
+.dp-az-index {
+  position: fixed;
+  right: max(0.35rem, env(safe-area-inset-right));
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.05rem;
+  z-index: 6;
+}
+.dp-az-index button {
+  background: none;
+  border: none;
+  color: var(--dp-accent-2);
+  font-size: 0.6rem;
+  font-weight: 800;
+  line-height: 1.5;
+  padding: 0 0.25rem;
 }

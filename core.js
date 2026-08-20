@@ -796,6 +796,8 @@ function initDashboardModules() {
   initFaqAccordion();
   initSettingsModal();
   initUssdModal();
+  initBankSelectModal();
+  initTransferRecipientPickers();
   initSidebar();
   initBottomNav();
   initPageRouter();
