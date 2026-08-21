@@ -3540,6 +3540,21 @@ select:focus-visible {
 }
 .modal-header .modal-title {
   flex: 1 1 auto;
+  /* A flex item's default min-width is "auto", which stops it from ever
+     shrinking below its own content width — that's what was forcing
+     long titles ("Transfer to DubemPay Account") to wrap onto a second
+     line instead of just shrinking to fit. min-width: 0 lets it actually
+     shrink; the ellipsis below is the fallback once it can't shrink any
+     further. */
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+@media (max-width: 420px) {
+  .modal-header .modal-title {
+    font-size: 1.02rem;
+  }
 }
 
 /* A dark backdrop behind a full-page view is invisible anyway (the page
@@ -4008,4 +4023,30 @@ html[data-theme="light"] .dp-tx-icon-interest {
   font-weight: 800;
   line-height: 1.5;
   padding: 0 0.25rem;
+}
+
+/* -----------------------------------------------------------------
+   19. ADD MONEY — the dashed divider inside the Bank Transfer card,
+   and the "— OR —" divider between it and the other funding methods.
+----------------------------------------------------------------- */
+.dp-dashed-divider {
+  border: none;
+  border-top: 1px dashed var(--dp-border);
+  margin: 0.85rem 0;
+}
+.dp-or-divider {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--dp-text-muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+  margin: 1rem 0;
+}
+.dp-or-divider::before,
+.dp-or-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--dp-border);
 }

@@ -44,15 +44,17 @@ test.describe('Dashboard', () => {
     await expect(balance).not.toHaveClass(/dp-hidden-balance/);
   });
 
-  test('Send Money shows a loading state, then disables clash-free re-enables', async ({ page }) => {
+  test('Add Money opens the funding page, and Top-up with Card/Account shows a loading state then resolves', async ({ page }) => {
     await signUp(page);
-    const btn = page.locator('#sendMoneyBtn');
+    await page.click('#addMoneyBtn');
+    await expect(page.locator('#addMoneyModal')).toBeVisible();
 
+    const btn = page.locator('#addMoneyCardTopupBtn');
     await btn.click();
     await expect(btn).toBeDisabled();
-    // Success now shows the full-page confirmation (#successModal); a
-    // simulated failure still falls back to the small #dpToast — assert
-    // on whichever one actually fired rather than assuming success.
+    // Success shows the full-page confirmation (#successModal); a
+    // simulated failure falls back to the small #dpToast — assert on
+    // whichever one actually fired rather than assuming success.
     await expect(async () => {
       const [toastVisible, successVisible] = await Promise.all([
         page.locator('#dpToast').isVisible(),

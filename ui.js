@@ -1920,6 +1920,54 @@ function initRecipientPicker({ listId, tabsSelector, searchBtnId, searchInputId,
   searchInput?.addEventListener("input", () => render(searchInput.value));
 }
 
+/* -----------------------------------------------------------------
+   9d. ADD MONEY
+----------------------------------------------------------------- */
+function initAddMoneyModal() {
+  const copyBtn = document.getElementById("addMoneyCopyBtn");
+  copyBtn?.addEventListener("click", async () => {
+    const accountNumber = "8024159930";
+    try {
+      await navigator.clipboard.writeText(accountNumber);
+      showToast("📋 Account number copied.");
+    } catch {
+      showToast("Account number: 802 415 9930");
+    }
+    playChime(760);
+  });
+
+  // "Top-up with Card/Account" — the one funding method here that's a
+  // real (if simplified) demo action rather than a stub: it's what the
+  // dashboard's "Add Money" button used to do directly before it became
+  // a real page. successRate isn't 100% — funding rarely fails, but it
+  // can (card declined, bank timeout) — so the UI should be able to
+  // show that.
+  const cardTopupBtn = document.getElementById("addMoneyCardTopupBtn");
+  cardTopupBtn?.addEventListener("click", async () => {
+    const success = await withButtonLoading(cardTopupBtn, {
+      loadingText: "Adding…",
+      successRate: 0.93,
+    });
+    if (success) {
+      appState.balance = (appState.balance || 0) + 50;
+      if (appState.balanceHistory?.length) appState.balanceHistory.push(appState.balance);
+      persistState();
+      renderBalance();
+      renderCurrencyChips();
+      plotBalanceSparkline();
+      bootstrap.Modal.getOrCreateInstance(document.getElementById("addMoneyModal")).hide();
+      showSuccessPage({
+        title: "Money Added",
+        amount: "$50.00",
+        details: [{ label: "Method", value: "Card/Account Top-up" }, { label: "Reference", value: generateRef() }],
+      });
+    } else {
+      showToast("❌ Couldn't add money — your funding source declined the request.", "error");
+      playChime(500);
+    }
+  });
+}
+
 function initTransferRecipientPickers() {
   initRecipientPicker({
     listId: "bankRecipientsList",

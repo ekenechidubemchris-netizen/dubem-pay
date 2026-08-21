@@ -465,12 +465,9 @@
             </div>
           </div>
 
-          <div class="d-flex justify-content-end gap-2 mt-3">
-            <button class="btn dp-btn-ghost dp-slide-cta" id="addMoneyBtn">
+          <div class="d-flex justify-content-end mt-3">
+            <button class="btn dp-btn-primary dp-slide-cta" id="addMoneyBtn" data-bs-toggle="modal" data-bs-target="#addMoneyModal">
               <i class="bi bi-plus-lg"></i> Add Money
-            </button>
-            <button class="btn dp-btn-primary dp-slide-cta" id="sendMoneyBtn">
-              Send <i class="bi bi-arrow-right dp-cta-arrow"></i>
             </button>
           </div>
 
@@ -3357,7 +3354,7 @@
       <div class="modal-content dp-modal-content">
         <div class="modal-header dp-modal-header">
           <button type="button" class="dp-page-back" data-bs-dismiss="modal" aria-label="Back"><i class="bi bi-chevron-left"></i></button>
-          <h5 class="modal-title" id="transferBankModalLabel"><i class="bi bi-bank me-2"></i>Transfer to Bank Account</h5>
+          <h5 class="modal-title" id="transferBankModalLabel">Transfer to Bank Account</h5>
           <button type="button" class="btn dp-link-btn btn-sm" data-label="Bank Transfer History">History</button>
         </div>
         <div class="modal-body">
@@ -3432,7 +3429,7 @@
       <div class="modal-content dp-modal-content">
         <div class="modal-header dp-modal-header">
           <button type="button" class="dp-page-back" data-bs-dismiss="modal" aria-label="Back"><i class="bi bi-chevron-left"></i></button>
-          <h5 class="modal-title" id="transferWalletModalLabel"><i class="bi bi-send-fill me-2"></i>Transfer to DubemPay Account</h5>
+          <h5 class="modal-title" id="transferWalletModalLabel">Transfer to DubemPay Account</h5>
           <button type="button" class="btn dp-link-btn btn-sm" data-label="Wallet Transfer History">History</button>
         </div>
         <div class="modal-body">
@@ -3518,6 +3515,87 @@
       </div>
       <!-- Positioned fixed (not inside the scroll column), see initBankSelectModal() -->
       <div class="dp-az-index" id="bankAzIndex"></div>
+    </div>
+  </div>
+
+  <!-- ===========================================================
+       MODAL: ADD MONEY
+       Opened from the balance card's "Add Money" button. Bank Transfer
+       is the only funding path that's "real" here (a fixed demo
+       account number you can copy) — the rest are stubs consistent
+       with the rest of the app's scope, except Top-up with Card/
+       Account, which reuses the old instant-$50-demo-add flow that
+       used to live directly on the dashboard button, and Bank USSD,
+       which links straight into the USSD Service page rather than
+       duplicating it.
+  ============================================================ -->
+  <div class="modal fade" id="addMoneyModal" tabindex="-1" aria-labelledby="addMoneyModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content dp-modal-content">
+        <div class="modal-header dp-modal-header">
+          <button type="button" class="dp-page-back" data-bs-dismiss="modal" aria-label="Back"><i class="bi bi-chevron-left"></i></button>
+          <h5 class="modal-title" id="addMoneyModalLabel">Add Money</h5>
+        </div>
+        <div class="modal-body">
+
+          <div class="dp-glass-inset mb-3">
+            <button type="button" class="dp-help-item mb-0" data-label="Add Money via Bank Transfer">
+              <span class="dp-help-item-icon"><i class="bi bi-bank"></i></span>
+              <span>
+                <span class="dp-help-item-title d-block">Bank Transfer</span>
+                <span class="dp-help-item-sub">Add money via mobile or internet banking</span>
+              </span>
+              <i class="bi bi-chevron-right dp-help-item-chevron"></i>
+            </button>
+            <hr class="dp-dashed-divider" />
+            <p class="dp-mini-label mb-2">DubemPay Account Number</p>
+            <h3 class="dp-loan-limit-figure mb-3">802 415 9930</h3>
+            <div class="d-flex gap-2">
+              <button type="button" class="btn dp-btn-ghost flex-fill" id="addMoneyCopyBtn">Copy Number</button>
+              <button type="button" class="btn dp-btn-primary flex-fill" data-label="Share Account Details">Share Details</button>
+            </div>
+          </div>
+
+          <p class="dp-or-divider"><span>OR</span></p>
+
+          <button type="button" class="dp-help-item mb-2" data-label="Cash Deposit">
+            <span class="dp-help-item-icon"><i class="bi bi-cash-coin"></i></span>
+            <span>
+              <span class="dp-help-item-title d-block">Cash Deposit</span>
+              <span class="dp-help-item-sub">Fund your account with nearby merchants</span>
+            </span>
+            <i class="bi bi-chevron-right dp-help-item-chevron"></i>
+          </button>
+
+          <button type="button" class="dp-help-item mb-2" id="addMoneyCardTopupBtn">
+            <span class="dp-help-item-icon"><i class="bi bi-credit-card-2-front-fill"></i></span>
+            <span>
+              <span class="dp-help-item-title d-block">Top-up with Card/Account</span>
+              <span class="dp-help-item-sub">Add money directly from your bank card or account</span>
+            </span>
+            <i class="bi bi-chevron-right dp-help-item-chevron"></i>
+          </button>
+
+          <button type="button" class="dp-help-item mb-2" data-bs-toggle="modal" data-bs-target="#ussdModal" data-bs-dismiss="modal">
+            <span class="dp-help-item-icon"><i class="bi bi-phone-fill"></i></span>
+            <span>
+              <span class="dp-help-item-title d-block">Bank USSD</span>
+              <span class="dp-help-item-sub">With other banks' USSD code</span>
+            </span>
+            <i class="bi bi-chevron-right dp-help-item-chevron"></i>
+          </button>
+
+          <button type="button" class="dp-help-item" data-label="Scan my QR Code">
+            <span class="dp-help-item-icon"><i class="bi bi-qr-code"></i></span>
+            <span>
+              <span class="dp-help-item-title d-block">Scan my QR Code</span>
+              <span class="dp-help-item-sub">Show QR code to any DubemPay user</span>
+            </span>
+            <i class="bi bi-chevron-right dp-help-item-chevron"></i>
+          </button>
+
+        </div>
+      </div>
     </div>
   </div>
 

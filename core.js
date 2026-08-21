@@ -797,12 +797,12 @@ function initDashboardModules() {
   initSettingsModal();
   initUssdModal();
   initBankSelectModal();
+  initAddMoneyModal();
   initTransferRecipientPickers();
   initSidebar();
   initBottomNav();
   initPageRouter();
   initMeSection();
-  initMiscButtons();
 
   console.log("DubemPay dashboard ready ✅ — all modules initialized.");
 }

@@ -552,68 +552,10 @@ function initInvoicing() {
 
 
 /* -----------------------------------------------------------------
-   11. MISC small wire-ups (Add Money / Send buttons play chime + CTA fire)
+   11. (formerly: Add Money / Send button wiring)
+   Both buttons now open real pages declaratively via data-bs-toggle in
+   the HTML — #addMoneyModal (see initAddMoneyModal() in ui.js) — so
+   there's nothing left to wire up here.
 ----------------------------------------------------------------- */
-function initMiscButtons() {
-  const addMoneyBtn = document.getElementById("addMoneyBtn");
-  const sendMoneyBtn = document.getElementById("sendMoneyBtn");
-
-  addMoneyBtn.addEventListener("click", async () => {
-    // 🔧 EDIT HERE: hook this up to a real "add money" flow/modal (amount entry,
-    // funding source) when you have one — this demo adds a fixed $50 so the
-    // balance is visibly live state instead of a static number.
-    // successRate is high but not 100% — funding rarely fails, but it can
-    // (card declined, bank timeout), so the UI should be able to show that.
-    const success = await withButtonLoading(addMoneyBtn, {
-      loadingText: "Adding…",
-      successRate: 0.93,
-    });
-    if (success) {
-      appState.balance = (appState.balance || 0) + 50;
-      if (appState.balanceHistory?.length) appState.balanceHistory.push(appState.balance);
-      persistState();
-      renderBalance();
-      renderCurrencyChips();
-      plotBalanceSparkline();
-      fireCta(addMoneyBtn);
-      showSuccessPage({
-        title: "Money Added",
-        amount: "$50.00",
-        details: [{ label: "Reference", value: generateRef() }],
-      });
-    } else {
-      showToast("❌ Couldn't add money — your funding source declined the request.", "error");
-      playChime(500);
-    }
-  });
-
-  sendMoneyBtn.addEventListener("click", async () => {
-    // 🔧 EDIT HERE: hook this up to a real "send money" flow/modal (recipient,
-    // amount) when you have one — this demo sends a fixed $20.
-    // Transfers fail more often than deposits in real life (wrong details,
-    // recipient bank down, etc.), so this one gets a lower success rate.
-    const success = await withButtonLoading(sendMoneyBtn, {
-      loadingText: "Sending…",
-      successRate: 0.85,
-    });
-    if (success) {
-      appState.balance = Math.max(0, (appState.balance || 0) - 20);
-      if (appState.balanceHistory?.length) appState.balanceHistory.push(appState.balance);
-      persistState();
-      renderBalance();
-      renderCurrencyChips();
-      plotBalanceSparkline();
-      fireCta(sendMoneyBtn);
-      showSuccessPage({
-        title: "Transfer Sent",
-        amount: "$20.00",
-        details: [{ label: "Reference", value: generateRef() }],
-      });
-    } else {
-      showToast("❌ Transfer failed — check your connection and try again.", "error");
-      playChime(500);
-    }
-  });
-}
 
 
